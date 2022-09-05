@@ -52,12 +52,19 @@ async def on_voice_state_update(member,before,after):
         try:
             #vcチャンネルに誰もいなくなった場合
             if len(before.channel.members) == 0:
-                send_message_content = "```" + member.display_name + "が「"+ before.channel.name + "」から切断されました。```"
-                print(send_message_content)
-                if before.channel.category.id != config.BASE_CATEGORY_ID:
-                    base_channel = client.get_channel(config.BASE_CATEGORY_ID)
-                    base_position = base_channel.position
-                    await before.channel.category.edit(position=base_position+1)
+                #同じカテゴリの他のvcに人がいる場合、ポジションを変えない
+                channel_list = before.channel.category.voice_channels
+                position_reset_flag = True
+                for channel in channel_list:
+                    if len(channel.members) > 0:
+                        position_reset_flag = False
+                if position_reset_flag:
+                    send_message_content = "```" + member.display_name + "が「"+ before.channel.name + "」から切断されました。```"
+                    print(send_message_content)
+                    if before.channel.category.id != config.BASE_CATEGORY_ID:
+                        base_channel = client.get_channel(config.BASE_CATEGORY_ID)
+                        base_position = base_channel.position
+                        await before.channel.category.edit(position=base_position+1)
         except AttributeError:
             pass
 
