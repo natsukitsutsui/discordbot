@@ -1,6 +1,7 @@
 import discord
 import config
 
+
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 
@@ -10,6 +11,7 @@ client = discord.Client(intents=intents)
 async def on_ready():
     print('ログインしました。')
 
+
 # メッセージ受信時に動作する処理
 @client.event
 async def on_message(message):
@@ -17,28 +19,29 @@ async def on_message(message):
     # メッセージ送信者がBotだった場合は無視する
     if message.author.bot:
         return
-    # 「/neko」と発言したら「にゃーん」が返る処理
+    
+    # 「@Botちゃん /join <channel.id>」でBotがvcチャンネルに参加
     if message.content.split()[1] == '/join':
         vc_channel = client.get_channel(int(message.content.split()[2]))
         print(vc_channel)
         await vc_channel.connect()
 
+    # 「@Botちゃん /join <channel.id>」でBotがvcチャンネルから離脱
     if message.content.split()[1] == '/leave':
         await message.guild.voice_client.disconnect()
-        
+
 
 @client.event
+# vcチャンネルに変更があった際に動作する処理
 async def on_voice_state_update(member,before,after):
-    #したいこと
-    #特定のチャンネルに入室した際、入室者が一人目だった場合にテキストチャンネルへの通知を出す
-
-    #テキストチャンネルのidが入った変数(仮)：text_channel_id
-    #入室を検知したいボイスチャンネルのidが入った変数(仮)：voice_channel_id
-    if before.channel == after.channel:#同じチャンネル内での変化（マイクミュートなど）の場合
-        pass#無視
-    else:#それ以外の場合
+    # 同じチャンネル内での変化（マイクミュートなど）の場合、無視
+    if before.channel == after.channel:
+        pass
+    # それ以外の場合
+    else:
         try:
-            if len(after.channel.members) == 1:#入室者が一人目の場合
+            # 入室者が一人目の場合
+            if len(after.channel.members) == 1:
                 send_message_content = "```" + member.display_name + "が「"+ after.channel.name + "」に一人目として接続しました。```"
                 print(send_message_content)
                 if after.channel.category.id != config.BASE_CATEGORY_ID:
@@ -47,6 +50,7 @@ async def on_voice_state_update(member,before,after):
             pass
 
         try:
+            #vcチャンネルに誰もいなくなった場合
             if len(before.channel.members) == 0:
                 send_message_content = "```" + member.display_name + "が「"+ before.channel.name + "」から切断されました。```"
                 print(send_message_content)
