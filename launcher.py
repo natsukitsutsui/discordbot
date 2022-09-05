@@ -20,15 +20,15 @@ async def on_message(message):
     if message.author.bot:
         return
     
-    # 「@Botちゃん /join <channel.id>」でBotがvcチャンネルに参加
-    if message.content.split()[1] == '/join':
-        vc_channel = client.get_channel(int(message.content.split()[2]))
-        print(vc_channel)
-        await vc_channel.connect()
+    # # 「@Botちゃん /join <channel.id>」でBotがvcチャンネルに参加
+    # if message.content.split()[1] == '/join':
+    #     vc_channel = client.get_channel(int(message.content.split()[2]))
+    #     print(vc_channel)
+    #     await vc_channel.connect()
 
-    # 「@Botちゃん /join <channel.id>」でBotがvcチャンネルから離脱
-    if message.content.split()[1] == '/leave':
-        await message.guild.voice_client.disconnect()
+    # # 「@Botちゃん /join <channel.id>」でBotがvcチャンネルから離脱
+    # if message.content.split()[1] == '/leave':
+    #     await message.guild.voice_client.disconnect()
 
 
 @client.event
