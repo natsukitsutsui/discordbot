@@ -1,6 +1,8 @@
 import discord
-import config
+import os
 
+ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
+BASE_CATEGORY_ID = 1016344180462714940
 
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
@@ -44,7 +46,7 @@ async def on_voice_state_update(member,before,after):
             if len(after.channel.members) == 1:
                 send_message_content = "```" + member.display_name + "が「"+ after.channel.name + "」に一人目として接続しました。```"
                 print(send_message_content)
-                if after.channel.category.id != config.BASE_CATEGORY_ID:
+                if after.channel.category.id != BASE_CATEGORY_ID:
                     await after.channel.category.edit(position=0)
         except AttributeError:
             pass
@@ -61,12 +63,12 @@ async def on_voice_state_update(member,before,after):
                 if position_reset_flag:
                     send_message_content = "```" + member.display_name + "が「"+ before.channel.name + "」から切断されました。```"
                     print(send_message_content)
-                    if before.channel.category.id != config.BASE_CATEGORY_ID:
-                        base_channel = client.get_channel(config.BASE_CATEGORY_ID)
+                    if before.channel.category.id != BASE_CATEGORY_ID:
+                        base_channel = client.get_channel(BASE_CATEGORY_ID)
                         base_position = base_channel.position
                         await before.channel.category.edit(position=base_position+1)
         except AttributeError:
             pass
 
 # Botの起動とDiscordサーバーへの接続
-client.run(config.ACCESS_TOKEN)
+client.run(ACCESS_TOKEN)

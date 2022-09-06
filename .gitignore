@@ -2,3 +2,4 @@
 .vscode/
 __pycache__/
 CommitMessage.txt
+config.py
