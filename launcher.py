@@ -91,6 +91,7 @@ async def on_voice_state_update(member,before,after):
                             try :
                                 if category_base_flag and category_sort_dict[category_id] > category_sort_dict[before.channel.category.id]:
                                     await before.channel.category.edit(position=category_position)
+                                    break
                             except KeyError:
                                 await before.channel.category.edit(position=len(category_list)-1)
                             if category_id == BASE_CATEGORY_ID:
