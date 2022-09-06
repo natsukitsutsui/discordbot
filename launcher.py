@@ -7,6 +7,7 @@ CATEGORY_SORTED_TXT = const.CATEGORY_SORTED_TXT
 BASE_CATEGORY_ID = const.BASE_CATEGORY_ID
 ACCESS_TOKEN = const.ACCESS_TOKEN
 GUILD_ID = const.GUILD_ID
+CHECK_CHANNEL = const.CHECK_CHANNEL
 
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
@@ -16,6 +17,8 @@ client = discord.Client(intents=intents)
 @client.event
 async def on_ready():
     print('ログインしました。')
+    channel = client.get_channel(CHECK_CHANNEL)
+    await channel.send("on ready")
 
 
 # メッセージ受信時に動作する処理
