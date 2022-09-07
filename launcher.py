@@ -2,6 +2,7 @@ import discord
 import const
 import os
 import config
+import time
 
 CATEGORY_SORTED_TXT = const.CATEGORY_SORTED_TXT
 BASE_CATEGORY_ID = const.BASE_CATEGORY_ID
@@ -24,7 +25,6 @@ async def on_ready():
 # メッセージ受信時に動作する処理
 @client.event
 async def on_message(message):
-    print(message.content)
     # メッセージ送信者がBotだった場合は無視する
     if message.author.bot:
         return
@@ -32,7 +32,6 @@ async def on_message(message):
     # # 「@Botちゃん /join <channel.id>」でBotがvcチャンネルに参加
     # if message.content.split()[1] == '/join':
     #     vc_channel = client.get_channel(int(message.content.split()[2]))
-    #     print(vc_channel)
     #     await vc_channel.connect()
 
     # # 「@Botちゃん /join <channel.id>」でBotがvcチャンネルから離脱
@@ -48,57 +47,29 @@ async def on_voice_state_update(member,before,after):
         pass
     # それ以外の場合
     else:
-        try:
-            # 入室者が一人目の場合
-            if len(after.channel.members) == 1:
-                send_message_content = "```" + member.display_name + "が「"+ after.channel.name + "」に一人目として接続しました。```"
-                print(send_message_content)
-                if after.channel.category.id != BASE_CATEGORY_ID:
-                    await after.channel.category.edit(position=0)
-        except AttributeError:
-            pass
-
-        try:
-            #vcチャンネルに誰もいなくなった場合
-            if len(before.channel.members) == 0:
-                #同じカテゴリの他のvcに人がいる場合、ポジションを変えない
-                channel_list = before.channel.category.voice_channels
-                position_reset_flag = True
-                for channel in channel_list:
-                    if len(channel.members) > 0:
-                        position_reset_flag = False
-                if position_reset_flag:
-                    send_message_content = "```" + member.display_name + "が「"+ before.channel.name + "」から切断されました。```"
-                    print(send_message_content)
-                    if before.channel.category.id != BASE_CATEGORY_ID:
-                        category_sorted = []
-                        # ソート済みのカテゴリーリストを取得
-                        with open(CATEGORY_SORTED_TXT, "r") as f:
-                            for line in f:
-                                category_sorted.append(int(line.strip()))
-                        category_sort_dict = dict()
-
-                        #カテゴリの順番を扱いやすいよう辞書に登録
-                        for category_position, category_id in enumerate(category_sorted):
-                            category_sort_dict[category_id] = category_position
-
-                        #カテゴリの元のpositionより大きい値のpositionが出現したらそこに挿入
-                        guild = client.get_guild(GUILD_ID)
-                        category_list = [[category.id, category.position] for category in guild.categories]
-                        print(category_list)
-                        category_base_flag = False
-                        for [category_id, category_position] in category_list:
-                            try :
-                                if category_base_flag and category_sort_dict[category_id] > category_sort_dict[before.channel.category.id]:
-                                    await before.channel.category.edit(position=category_position)
-                                    break
-                            except KeyError:
-                                await before.channel.category.edit(position=len(category_list)-1)
-                            if category_id == BASE_CATEGORY_ID:
-                                category_base_flag = True
-
-        except AttributeError:
-            pass
+        # ソート済みのカテゴリーリストを取得
+        category_sorted = []
+        with open(CATEGORY_SORTED_TXT, "r") as f:
+            for line in f:
+                category_sorted.append(int(line.strip()))
+        category_sort_dict = dict()
+        # カテゴリの順番を扱いやすいよう辞書に登録
+        for category_position, category_id in enumerate(category_sorted):
+            category_sort_dict[category_id] = category_position
+        
+        categories = client.get_guild(GUILD_ID).categories
+        category_list = []
+        for category in categories:
+            category_members = sum([len(channel.members) for channel in category.voice_channels])
+            # [カテゴリの人数, カテゴリの元の位置, カテゴリのid]
+            category_list.append([category_members, -category_sort_dict[category.id], category.id])
+        
+        category_list.sort(reverse=True)
+        for position, [category_members, category_origin_position, category_id] in enumerate(category_list):
+            category = client.get_channel(category_id)
+            category_now_position = category.position
+            if category_now_position != position:
+                await category.edit(position=position)
 
 # Botの起動とDiscordサーバーへの接続
 client.run(ACCESS_TOKEN)
