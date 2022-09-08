@@ -41,6 +41,8 @@ async def on_message(message):
 
 @client.event
 # vcチャンネルに変更があった際に動作する処理
+# do: categry_listでfor文を回すと一個ずつずれるせいで動作が遅い
+#     
 async def on_voice_state_update(member,before,after):
     # 同じチャンネル内での変化（マイクミュートなど）の場合、無視
     if before.channel == after.channel:
