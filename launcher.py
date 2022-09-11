@@ -64,10 +64,14 @@ async def on_voice_state_update(member,before,after):
         for category in categories:
             category_members = sum([len(channel.members) for channel in category.voice_channels])
             # [カテゴリの人数, カテゴリの元の位置, カテゴリのid]
-            category_list.append([category_members, -category_sort_dict[category.id], category.id])
+            if category.id == BASE_CATEGORY_ID:
+                base_flag = 1
+            else:
+                base_flag = 0
+            category_list.append([base_flag, category_members, -category_sort_dict[category.id], category.id])
         
         category_list.sort(reverse=True)
-        for position, [category_members, category_origin_position, category_id] in enumerate(category_list):
+        for position, [base_flag, category_members, category_origin_position, category_id] in enumerate(category_list):
             category = client.get_channel(category_id)
             category_now_position = category.position
             if category_now_position != position:
